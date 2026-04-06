@@ -3,23 +3,23 @@ import { Link } from 'react-router-dom';
 import { useGetSeafoodRecipesQuery } from '../features/api/apiSlice';
 
 const HomePage = () => {
-  // 1. Fetch data gamit ang RTK Query (API 1: Seafood List)
+  // Fetch data gamit ang RTK Query
   const { data, isLoading, error } = useGetSeafoodRecipesQuery();
   
-  // 2. States para sa Search at Pagination
+  // States para sa Search at Pagination
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const recipesPerPage = 8; // Requirement: Hatiin ang listahan para sa pagination
+  const recipesPerPage = 8; 
 
-  if (isLoading) return <div className="status-message">Loading fresh seafood...</div>;
-  if (error) return <div className="status-message">Something went wrong. Please refresh the page.</div>;
+  if (isLoading) return <div className="status-message">Loading recipes...</div>;
+  if (error) return <div className="status-message">Error loading data.</div>;
 
-  // 3. Search Engine Logic (Real-time filtering)
+  // Search Engine Logic: Real-time filtering
   const filteredRecipes = data?.meals?.filter((meal) =>
     meal.strMeal.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  // 4. Pagination Logic
+  // Pagination Logic
   const indexOfLastRecipe = currentPage * recipesPerPage;
   const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
   const currentRecipes = filteredRecipes.slice(indexOfFirstRecipe, indexOfLastRecipe);
@@ -27,47 +27,38 @@ const HomePage = () => {
 
   return (
     <div className="container">
-      <header className="home-header">
+      <header>
         <h1>Seafood Recipe Explorer</h1>
-        <p>Discover the best seafood dishes from around the world.</p>
-        
-        {/* Search Input Section */}
         <div className="search-container">
           <input
             type="text"
             className="search-input"
-            placeholder="Search for a recipe (e.g. Fish, Prawn)..."
+            placeholder="Search for a recipe..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
-              setCurrentPage(1); // Reset sa page 1 para hindi mag-error ang pagination
+              setCurrentPage(1); // Reset sa page 1 pag nag-search
             }}
           />
         </div>
       </header>
 
-      {/* Recipe Grid: Dito aayusin ng CSS ang "panget" na layout */}
+      {/* Grid Layout Container */}
       <div className="recipe-container">
-        {currentRecipes.length > 0 ? (
-          currentRecipes.map((meal) => (
-            <div key={meal.idMeal} className="recipe-card">
-              <div className="card-image-wrapper">
-                <img src={meal.strMealThumb} alt={meal.strMeal} />
-              </div>
-              <div className="card-content">
-                <h3>{meal.strMeal}</h3>
-                <Link to={`/recipe/${meal.idMeal}`} className="view-btn">
-                  View Full Recipe
-                </Link>
-              </div>
+        {currentRecipes.map((meal) => (
+          <div key={meal.idMeal} className="recipe-card">
+            <img src={meal.strMealThumb} alt={meal.strMeal} />
+            <div className="card-content">
+              <h3>{meal.strMeal}</h3>
+              <Link to={`/recipe/${meal.idMeal}`} className="view-btn">
+                View Full Recipe
+              </Link>
             </div>
-          ))
-        ) : (
-          <div className="status-message">No recipes found for "{searchTerm}"</div>
-        )}
+          </div>
+        ))}
       </div>
 
-      {/* Pagination Controls */}
+      {/* Pagination Buttons */}
       {totalPages > 1 && (
         <div className="pagination">
           {Array.from({ length: totalPages }, (_, i) => (
@@ -75,7 +66,7 @@ const HomePage = () => {
               key={i + 1}
               onClick={() => {
                 setCurrentPage(i + 1);
-                window.scrollTo(0, 0); // Scroll to top para magandang UX
+                window.scrollTo(0, 0);
               }}
               className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`}
             >
